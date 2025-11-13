@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Юутуб (по-українськи) — Неон від Furry</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="termsModal" class="modal active">
+    <div class="modal-content">
+      <h2>Ласкаво просимо на Юутуб (по-українськи)</h2>
+      <p>Прийміть умови використання, щоб продовжити. Це демо-проєкт.</p>
+      <div class="modal-actions">
+        <button id="acceptTerms" class="btn">Погоджуюсь</button>
+        <button id="declineTerms" class="btn outline">Відмінити</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">Ю</div>
+      <div>
+        <div class="title">Юутуб <span class="sm">по-українськи</span></div>
+        <div class="by">Від Furry — створено Артемом Процком</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="downloadBtn" class="btn small">Завантажити додаток</button>
+      <button id="loginBtn" class="btn outline small">Увійти</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <aside class="sidebar">
+      <nav>
+        <a class="nav-item active">Головна</a>
+        <a class="nav-item">Тренди</a>
+        <a class="nav-item">Музика</a>
+        <a class="nav-item">Підписки</a>
+      </nav>
+    </aside>
+
+    <section class="content">
+      <div id="loader" class="loader hidden">
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>
+      <div id="results" class="results"></div>
+      <div class="more-wrap">
+        <button id="loadMore" class="btn">Показати ще</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="searchbar">
+    <div class="search-inner">
+      <input id="searchInput" placeholder="Пошук відео..." />
+      <button id="searchBtn" class="btn">Пошук</button>
+    </div>
+  </footer>
+
+  <!-- Player modal -->
+  <div id="playerModal" class="modal">
+    <div class="modal-content player-modal">
+      <div class="player-wrap">
+        <iframe id="playerFrame" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div class="player-actions">
+        <button id="closePlayer" class="btn outline">Закрити</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
+
