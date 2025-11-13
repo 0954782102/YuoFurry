@@ -11,10 +11,23 @@ const closePlayer = document.getElementById('closePlayer');
 const acceptTerms = document.getElementById('acceptTerms');
 const declineTerms = document.getElementById('declineTerms');
 const termsModal = document.getElementById('termsModal');
+const loginBtn = document.getElementById('loginBtn');
 
 let nextPageToken = null;
 let currentQuery = null;
 let loading = false;
+
+// Check if user already logged in
+const currentUser = localStorage.getItem('yg_current_user');
+if(currentUser){
+    loginBtn.style.display='none';
+} 
+
+// Check if terms accepted
+if(localStorage.getItem('termsAccepted')){
+    termsModal.classList.remove('active');
+    if(!currentUser) fetchTrending('UA');
+}
 
 // Loader
 function showLoader(){ loader.classList.remove('hidden'); }
@@ -22,11 +35,12 @@ function hideLoader(){ loader.classList.add('hidden'); }
 
 // Create video card
 function createCard(item){
-  const id = item.id.videoId || item.id; // videoId for search, id for trending
+  const id = item.id.videoId || item.id; 
   const thumb = item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url || '';
   const title = item.snippet.title;
   const channel = item.snippet.channelTitle;
-  
+  const channelId = item.snippet.channelId;
+
   const card = document.createElement('article');
   card.className = 'card';
   card.innerHTML = `
@@ -36,8 +50,13 @@ function createCard(item){
       <p>${channel}</p>
     </div>
   `;
-  
   card.onclick = () => openPlayer(id);
+  // Click on channel name to go to channel videos
+  card.querySelector('p').style.cursor='pointer';
+  card.querySelector('p').onclick = (e)=>{
+      e.stopPropagation();
+      openChannel(channelId);
+  };
   resultsEl.appendChild(card);
 }
 
@@ -58,7 +77,6 @@ async function fetchTrending(region='UA', append=false){
   try{
     let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=${region}&maxResults=40&key=${API_KEY}`;
     if(append && nextPageToken) url += `&pageToken=${nextPageToken}`;
-    
     const res = await fetch(url);
     const data = await res.json();
     if(data.items && data.items.length){
@@ -85,7 +103,6 @@ async function searchVideos(query, append=false){
   try{
     let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=40&q=${encodeURIComponent(query)}&key=${API_KEY}`;
     if(append && nextPageToken) url += `&pageToken=${nextPageToken}`;
-    
     const res = await fetch(url);
     const data = await res.json();
     if(data.items && data.items.length){
@@ -104,10 +121,36 @@ async function searchVideos(query, append=false){
   }
 }
 
+// Open channel videos
+async function openChannel(channelId){
+  currentQuery = null;
+  nextPageToken = null;
+  resultsEl.innerHTML='';
+  loading=true;
+  showLoader();
+  try{
+    let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=40&key=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.items && data.items.length){
+      data.items.forEach(createCard);
+      nextPageToken = data.nextPageToken || null;
+    } else {
+      resultsEl.innerHTML = '<p>Нових відео не знайдено</p>';
+    }
+  } catch(e){
+    console.error(e);
+  } finally{
+    hideLoader();
+    loading=false;
+  }
+}
+
 // Terms modal
 acceptTerms.onclick = () => { 
   termsModal.classList.remove('active'); 
-  currentQuery=null; nextPageToken=null; fetchTrending('UA'); 
+  localStorage.setItem('termsAccepted','true');
+  if(!localStorage.getItem('yg_current_user')) fetchTrending('UA');
 };
 declineTerms.onclick = ()=>{ alert('Погодження необхідне для користування сайтом.'); };
 
@@ -174,15 +217,12 @@ document.getElementById('downloadBtn').onclick = ()=>{
 };
 
 // Login
-document.getElementById('loginBtn').onclick = ()=>{
+loginBtn.onclick = ()=>{
   const name = prompt('Введіть ім\'я користувача:');
   if(!name) return;
-  let users = JSON.parse(localStorage.getItem('yg_users')||'[]');
-  if(!users.find(u=>u.name===name)){
-    users.push({name, created: new Date().toISOString()});
-    localStorage.setItem('yg_users', JSON.stringify(users));
-    alert('Збережено локально.');
-  } else alert('Ласкаво просимо назад, '+name);
+  localStorage.setItem('yg_current_user', name);
+  loginBtn.style.display='none';
+  alert('Ласкаво просимо, '+name);
 };
 
 // Hide loader at start
